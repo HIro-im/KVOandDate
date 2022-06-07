@@ -7,6 +7,7 @@
 
 import UIKit
 import WebKit
+import RealmSwift
 
 class ViewController: UIViewController, WKNavigationDelegate {
 
@@ -21,7 +22,13 @@ class ViewController: UIViewController, WKNavigationDelegate {
     var goBackButtonItem: UIBarButtonItem!
     var goForwardButtonItem: UIBarButtonItem!
     var goGoogleButtonItem: UIBarButtonItem!
-
+    
+    let dt = Date()
+    let dateFormatter = DateFormatter()
+    
+    var realm = try! Realm()
+    
+    
     override func loadView() {
         // webビューの定義
         webView = WKWebView()
@@ -58,6 +65,7 @@ class ViewController: UIViewController, WKNavigationDelegate {
         self.webView?.removeObserver(self, forKeyPath: "title")
     }
     
+    // URLとページ名に変化が入ったら行われる処理(現在表示しているwebページの情報を格納する)
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         
         // 変更が入った際に、常に現在のURLとページ名を変数に格納する
@@ -69,6 +77,28 @@ class ViewController: UIViewController, WKNavigationDelegate {
         if let title = change![NSKeyValueChangeKey.newKey] as? String {
             currentPageName = title
         }
+        
+        dateFormatter.timeStyle = .short
+        dateFormatter.dateStyle = .short
+        dateFormatter.locale = Locale(identifier: "ja_JP")
+
+        print(dateFormatter.string(from: dt))
+        print(currentUrl)
+        print(currentPageName)
+        
+        let memo = MemoDate()
+        
+        memo.URL = currentUrl
+        memo.pageName = currentPageName
+        memo.watchDate = dateFormatter.string(from: dt)
+
+        
+        try! realm.write {
+            realm.add(memo)
+        }
+        
+        let objects = realm.objects(MemoDate.self)
+        print(objects)
                 
     }
     
