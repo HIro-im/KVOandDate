@@ -78,28 +78,12 @@ class ViewController: UIViewController, WKNavigationDelegate {
             currentPageName = title
         }
         
-        dateFormatter.timeStyle = .short
-        dateFormatter.dateStyle = .short
-        dateFormatter.locale = Locale(identifier: "ja_JP")
-
-        print(dateFormatter.string(from: dt))
-        print(currentUrl)
-        print(currentPageName)
         
-        let memo = MemoDate()
-        
-        memo.URL = currentUrl
-        memo.pageName = currentPageName
-        memo.watchDate = dateFormatter.string(from: dt)
-
-        
-        try! realm.write {
-            realm.add(memo)
+        // URLが初回ページ(Google)と同じであればrealmには登録しない
+        if currentUrl != initialUrl {
+            historyRegister(currentUrl, currentPageName)
         }
-        
-        let objects = realm.objects(MemoDate.self)
-        print(objects)
-                
+                        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -134,6 +118,37 @@ class ViewController: UIViewController, WKNavigationDelegate {
         let url = URL(string: nextUrl)!
         webView.load(URLRequest(url: url))
         webView.allowsBackForwardNavigationGestures = true
+    }
+    
+    // 履歴への登録処理
+    func historyRegister(_ registerURL: String, _ registerPageName: String) {
+        // realmへの登録関連ロジック(ここから、切り出したい)
+        
+        dateFormatter.timeStyle = .short
+        dateFormatter.dateStyle = .short
+        dateFormatter.locale = Locale(identifier: "ja_JP")
+
+        print(dateFormatter.string(from: dt))
+        print(registerURL)
+        print(registerPageName)
+        
+        let memo = MemoDate()
+        
+        memo.URL = registerURL
+        memo.pageName = registerPageName
+        memo.watchDate = dateFormatter.string(from: dt)
+
+        
+        try! realm.write {
+            realm.add(memo)
+        }
+        
+        let objects = realm.objects(MemoDate.self).sorted(byKeyPath: "watchDate", ascending: false)
+        print(objects)
+        
+        // realmへの登録関連ロジック(ここまで、切り出したい)
+
+        
     }
 
 }

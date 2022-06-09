@@ -36,8 +36,8 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         // 挙動観測のための一文
         print("table viewWillAppear")
         
-        // realm内のテーブルを取り出して、メンバ変数への格納と件数を取得する
-        objects = realm.objects(MemoDate.self)
+        // realm内のテーブルを取り出して、メンバ変数への格納と件数を取得する(日付が新しい順番で取得する)
+        objects = realm.objects(MemoDate.self).sorted(byKeyPath: "watchDate", ascending: false)
         countRecord = objects.count
         print("全てのデータ(viewWillAppear時)\(objects)")
         
