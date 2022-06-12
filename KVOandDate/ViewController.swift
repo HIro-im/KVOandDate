@@ -23,7 +23,6 @@ class ViewController: UIViewController, WKNavigationDelegate {
     var goForwardButtonItem: UIBarButtonItem!
     var goGoogleButtonItem: UIBarButtonItem!
     
-    let dt = Date()
     let dateFormatter = DateFormatter()
     
     var realm = try! Realm()
@@ -78,12 +77,6 @@ class ViewController: UIViewController, WKNavigationDelegate {
             currentPageName = title
         }
         
-        
-        // URLが初回ページ(Google)と同じであればrealmには登録しない
-        if currentUrl != initialUrl {
-            historyRegister(currentUrl, currentPageName)
-        }
-                        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -120,10 +113,23 @@ class ViewController: UIViewController, WKNavigationDelegate {
         webView.allowsBackForwardNavigationGestures = true
     }
     
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        print("didFinish,currentURL:\(currentUrl)")
+        print("didFinish,currentName:\(currentPageName)")
+
+        // URLが初回ページ(Google)と同じであればrealmには登録しない
+        if currentUrl != initialUrl {
+            historyRegister(currentUrl, currentPageName)
+        }
+
+    }
+    
     // 履歴への登録処理
     func historyRegister(_ registerURL: String, _ registerPageName: String) {
         // realmへの登録関連ロジック(ここから、切り出したい)
         
+        let dt = Date()
+
         dateFormatter.timeStyle = .short
         dateFormatter.dateStyle = .short
         dateFormatter.locale = Locale(identifier: "ja_JP")
