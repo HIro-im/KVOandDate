@@ -44,6 +44,10 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         // リストビューを再読込する
         tableView.reloadData()
         
+        // 確認処理
+        print(Parameter.pickup)
+        print(Parameter.pickdown)
+        
     }
     
     // TableViewに表示するテーブル行の数(ここでは配列の個数を参照している)

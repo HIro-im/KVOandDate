@@ -88,6 +88,14 @@ class ViewController: UIViewController, WKNavigationDelegate {
         
         // ログ状監視のためのprint(消してもいい)
         print("viewWillAppear browser")
+        // 確認処理
+        print(Parameter.pickup)
+        print(Parameter.pickdown)
+        // 確認処理
+        print(Parameter2.first.rawValue)
+        print(Parameter2.second.rawValue)
+
+
     }
             
     // webビューを戻す処理
