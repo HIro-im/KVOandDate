@@ -26,6 +26,7 @@ class ViewController: UIViewController, WKNavigationDelegate {
     let dateFormatter = DateFormatter()
     
     var realm = try! Realm()
+    var progressView = UIProgressView()
     
     
     override func loadView() {
@@ -46,6 +47,10 @@ class ViewController: UIViewController, WKNavigationDelegate {
         // オブザーバーの設定(表示しているURLとページ名を監視して、変化した際に取得できるようにする)
         self.webView?.addObserver(self, forKeyPath: "URL", options: .new, context: nil)
         self.webView?.addObserver(self, forKeyPath: "title", options: .new, context: nil)
+        
+        // こちらはloadingとローディング情報を監視してプログレスバーを表示できるようにしている
+        self.webView?.addObserver(self, forKeyPath: "loading", options: .new, context: nil)
+        self.webView?.addObserver(self, forKeyPath: "estimatedProgress", options: .new, context: nil)
                 
         // ブラウザバック・進むボタン
         goBackButtonItem = UIBarButtonItem(title: "←", style: .plain, target: self, action: #selector(backBarButtonTapped))
@@ -56,12 +61,20 @@ class ViewController: UIViewController, WKNavigationDelegate {
         self.navigationItem.leftBarButtonItems = [goBackButtonItem,goForwardButtonItem,goGoogleButtonItem]
         
         
+        // プログレスバーを生成
+        progressView = UIProgressView(frame: CGRect(x: 0, y: navigationController!.navigationBar.frame.size.height - 2, width: self.view.frame.size.width, height: 10))
+        progressView.progressViewStyle = .bar
+        
+        self.navigationController?.navigationBar.addSubview(progressView)
+        
     }
     
     // KVOの破棄
     deinit {
         self.webView?.removeObserver(self, forKeyPath: "URL")
         self.webView?.removeObserver(self, forKeyPath: "title")
+        self.webView?.removeObserver(self, forKeyPath: "estimatedProgress")
+        self.webView?.removeObserver(self, forKeyPath: "loading")
     }
     
     // URLとページ名に変化が入ったら行われる処理(現在表示しているwebページの情報を格納する)
@@ -75,6 +88,18 @@ class ViewController: UIViewController, WKNavigationDelegate {
         
         if let title = change![NSKeyValueChangeKey.newKey] as? String {
             currentPageName = title
+        }
+        
+        if keyPath == "estimatedProgress" {
+            // estimatedProgressが変更されたときに、setProgressを使ってプログレスバーの値を変更する
+            self.progressView.setProgress(Float(self.webView.estimatedProgress), animated: true)
+        } else if keyPath == "loading" {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = self.webView.isLoading
+            if self.webView.isLoading {
+                self.progressView.setProgress(0.1,animated: true)
+            } else {
+                self.progressView.setProgress(0.0, animated: false)
+            }
         }
         
     }
